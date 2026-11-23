@@ -1,0 +1,7 @@
+.gradle
+src
+.env.example
+build/tmp
+build/classes
+build/libs
+build/reports
