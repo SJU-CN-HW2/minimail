@@ -1,7 +1,7 @@
 # PROJECT-MINIMAIL-PR-CI.yaml
 # main 대상 PR에서 전체 빌드와 테스트를 실행한다.
 # Java 버전은 gradle.properties의 javaVersion에서 읽어 사용한다 (워크플로우에 하드코딩하지 않음).
-# DB 테스트는 @Tag("db")로 Gradle에서 제외되므로 별도 DB 없이 실행된다.
+# DB를 쓰는 테스트는 작성하지 않으므로 별도 DB 없이 실행된다.
 
 name: PR CI
 

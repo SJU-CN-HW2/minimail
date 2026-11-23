@@ -12,20 +12,6 @@ subprojects {
     }
 
     tasks.named('test') {
-        useJUnitPlatform {
-            excludeTags 'db'
-        }
-        failOnNoDiscoveredTests = false
-    }
-
-    tasks.register('dbTest', Test) {
-        group = 'verification'
-        description = 'Runs tests tagged "db" (needs a local PostgreSQL).'
-        testClassesDirs = sourceSets.test.output.classesDirs
-        classpath = sourceSets.test.runtimeClasspath
-        useJUnitPlatform {
-            includeTags 'db'
-        }
-        failOnNoDiscoveredTests = false
+        useJUnitPlatform()
     }
 }
