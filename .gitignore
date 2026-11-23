@@ -32,6 +32,9 @@ Thumbs.db
 # Agent scratch workspace
 /.superpowers
 
+# Work reports
+/.report
+
 # Gradle
 .gradle/
 /build/
