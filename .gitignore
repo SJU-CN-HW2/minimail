@@ -22,3 +22,17 @@ Thumbs.db
 
 # Submission archive
 *.zip
+
+# Issue drafts
+/.issue
+
+# Local planning docs
+/docs
+
+# Agent scratch workspace
+/.superpowers
+
+# Gradle
+.gradle/
+/build/
+/*/build/
