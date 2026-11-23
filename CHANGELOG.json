@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "lastUpdated": "2026-11-23T05:47:36Z",
+    "currentVersion": "0.0.2",
+    "projectTypes": [
+      "basic"
+    ],
+    "totalReleases": 1
+  },
+  "releases": [
+    {
+      "version": "0.0.2",
+      "project_types": [
+        "basic"
+      ],
+      "date": "2026-11-23",
+      "pr_number": null,
+      "raw_summary": "### 📝 문서\n- add project CLAUDE.md\n\n### 🔧 변경사항\n- add .gitignore\n- add version.yml\n- add github workflows and release scripts\n- Initial commit",
+      "parsed_changes": {
+        "docs": {
+          "title": "📝 문서",
+          "items": [
+            "add project CLAUDE.md"
+          ]
+        },
+        "changes": {
+          "title": "🔧 변경사항",
+          "items": [
+            "add .gitignore",
+            "add version.yml",
+            "add github workflows and release scripts",
+            "Initial commit"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    }
+  ]
+}
