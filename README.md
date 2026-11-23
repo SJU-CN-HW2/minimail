@@ -1,5 +1,8 @@
 # minimail
 
+<!-- AUTO-VERSION-SECTION: DO NOT EDIT MANUALLY -->
+## 최신 버전 : v0.0.4 (2026-11-23)
+
 ## 프로젝트 개요
 
 minimail은 TCP 소켓 위에서 SMTP, POP3, IMAP 프로토콜을 직접 구현한 메일 시스템이다. Java 21로 작성하며 외부 네트워크 프레임워크 없이 순수 소켓 API만 사용한다. 메일 데이터는 PostgreSQL에 저장한다. 컴퓨터 네트워크 과제 2의 결과물이다.
