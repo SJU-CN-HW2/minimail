@@ -1,0 +1,17 @@
+subprojects {
+    apply plugin: 'java'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(providers.gradleProperty('javaVersion').get().toInteger())
+        }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+}

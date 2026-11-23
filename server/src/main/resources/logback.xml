@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  패턴 필드 설명
+  - ts: 이벤트 시각 (ISO8601)
+  - level: 로그 레벨
+  - logger: 로거 이름 (보통 클래스 FQCN)
+  - sessionId / protocol / remote: MDC 키. 코드에서 MDC.put("sessionId", ...) 등으로 설정하며,
+    값이 없으면 대시(-) 한 개로 출력된다.
+  - msg: 로그 메시지
+
+  루트 레벨은 환경변수 LOG_LEVEL 로 지정하며, 없으면 INFO 를 사용한다.
+-->
+<configuration>
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>ts=%d{ISO8601} level=%level logger=%logger sessionId=%X{sessionId:--} protocol=%X{protocol:--} remote=%X{remote:--} msg="%msg"%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="${LOG_LEVEL:-INFO}">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>

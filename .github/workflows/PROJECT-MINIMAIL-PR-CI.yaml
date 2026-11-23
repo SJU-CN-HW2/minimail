@@ -1,0 +1,37 @@
+# PROJECT-MINIMAIL-PR-CI.yaml
+# main 대상 PR에서 전체 빌드와 테스트를 실행한다.
+# Java 버전은 gradle.properties의 javaVersion에서 읽어 사용한다 (워크플로우에 하드코딩하지 않음).
+# DB를 쓰는 테스트는 작성하지 않으므로 별도 DB 없이 실행된다.
+
+name: PR CI
+
+on:
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Read Java version from gradle.properties
+        run: echo "JAVA_VERSION=$(grep -E '^javaVersion[[:space:]]*=' gradle.properties | cut -d= -f2 | tr -d '[:space:]')" >> "$GITHUB_ENV"
+
+      - name: Set up JDK
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: gradle
+
+      - name: Grant execute permission to gradlew
+        run: chmod +x gradlew
+
+      - name: Build and test
+        run: ./gradlew build

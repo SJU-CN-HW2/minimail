@@ -1,0 +1,159 @@
+# PROJECT-MINIMAIL-SERVER-DEPLOY.yaml
+# main 푸시 시 서버 이미지를 빌드해 DockerHub에 올리고, EC2에 SSH로 접속해 컨테이너를 교체 실행한다.
+# 필수 GitHub Secrets (이름만): ENV_FILE, DOCKERHUB_USERNAME, DOCKERHUB_TOKEN,
+#   SERVER_HOST, SERVER_PORT, SERVER_USER, SERVER_PASSWORD
+# Java 버전은 gradle.properties의 javaVersion에서 읽는다. 컨테이너 포트는 이미지 안의 .env.production에서만 읽는다.
+# EC2는 arm64(Graviton)라서 이미지를 linux/arm64로 빌드한다. Dockerfile에 RUN 단계가 없어 QEMU가 필요 없다.
+# 주의: 서버 main 클래스가 생기기 전의 첫 배포는 헬스체크에서 실패한다 (알고 가는 동작).
+
+name: Server Deploy
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "server/**"
+      - "settings.gradle"
+      - "build.gradle"
+      - "gradle.properties"
+      - "gradle/**"
+      - "gradlew"
+      - ".github/workflows/PROJECT-MINIMAIL-SERVER-DEPLOY.yaml"
+  workflow_dispatch:
+
+concurrency:
+  group: minimail-server-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  PROJECT_NAME: minimail
+  IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/minimail:latest
+  HEALTHCHECK_WAIT_SECONDS: "5"
+  HEALTHCHECK_MAX_RETRIES: "12"
+  HEALTHCHECK_RETRY_INTERVAL: "5"
+
+jobs:
+  build:
+    name: build and push image
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Read Java version from gradle.properties
+        run: echo "JAVA_VERSION=$(grep -E '^javaVersion[[:space:]]*=' gradle.properties | cut -d= -f2 | tr -d '[:space:]')" >> "$GITHUB_ENV"
+
+      - name: Set up JDK
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: gradle
+
+      - name: Write server/.env.production from ENV_FILE
+        env:
+          ENV_FILE: ${{ secrets.ENV_FILE }}
+        run: |
+          if [ -z "$(printf '%s' "$ENV_FILE" | tr -d '[:space:]')" ]; then
+            echo "::error::ENV_FILE secret is empty"
+            exit 1
+          fi
+          printf '%s\n' "$ENV_FILE" | tr -d '\r' > server/.env.production
+
+      - name: Validate required port keys
+        run: |
+          for key in SMTP_PORT POP3_PORT IMAP_PORT; do
+            if ! grep -Eq "^${key}=[0-9]+$" server/.env.production; then
+              echo "::error::${key} is missing or not numeric in ENV_FILE"
+              exit 1
+            fi
+          done
+
+      - name: Grant execute permission to gradlew
+        run: chmod +x gradlew
+
+      - name: Build distribution
+        run: ./gradlew :server:installDist
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v7
+        with:
+          context: ./server
+          push: true
+          build-args: |
+            JAVA_VERSION=${{ env.JAVA_VERSION }}
+          platforms: linux/arm64
+          tags: ${{ env.IMAGE }}
+
+  deploy:
+    name: deploy to EC2
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy container over SSH
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1.2.5
+        env:
+          SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          port: ${{ secrets.SERVER_PORT }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          envs: IMAGE,PROJECT_NAME,SERVER_PASSWORD,HEALTHCHECK_WAIT_SECONDS,HEALTHCHECK_MAX_RETRIES,HEALTHCHECK_RETRY_INTERVAL
+          script: |
+            set -e
+
+            # EC2의 docker는 sudo가 필요할 수 있어 SERVER_PASSWORD를 stdin으로 넘겨 실행한다.
+            run_docker() { printf '%s\n' "$SERVER_PASSWORD" | sudo -S -p '' docker "$@"; }
+
+            run_docker pull "$IMAGE"
+
+            # 포트는 이미지의 .env.production에서 ENTRYPOINT와 같은 방식(셸 소싱)으로 읽는다.
+            PORTS=$(run_docker run --rm --entrypoint sh "$IMAGE" -c 'set -a; . /app/.env.production; echo "$SMTP_PORT $POP3_PORT $IMAP_PORT"')
+            set -- $PORTS
+            if [ "$#" -ne 3 ]; then
+              echo "port read failed: $PORTS"
+              exit 1
+            fi
+            for port in "$@"; do
+              case "$port" in
+                ''|*[!0-9]*) echo "non-numeric port: $port"; exit 1 ;;
+              esac
+            done
+
+            run_docker rm -f "$PROJECT_NAME" || true
+            run_docker run -d --name "$PROJECT_NAME" --restart unless-stopped \
+              -p "$1:$1" -p "$2:$2" -p "$3:$3" "$IMAGE"
+
+            sleep "$HEALTHCHECK_WAIT_SECONDS"
+            attempt=1
+            while [ "$attempt" -le "$HEALTHCHECK_MAX_RETRIES" ]; do
+              if [ "$(run_docker inspect -f '{{.State.Running}}' "$PROJECT_NAME")" = "true" ] \
+                && run_docker exec "$PROJECT_NAME" sh -c 'set -a; . /app/.env.production; nc -z 127.0.0.1 "$SMTP_PORT"'; then
+                echo "healthcheck passed (attempt $attempt)"
+                run_docker image prune -f
+                exit 0
+              fi
+              echo "healthcheck attempt $attempt/$HEALTHCHECK_MAX_RETRIES failed"
+              attempt=$((attempt + 1))
+              sleep "$HEALTHCHECK_RETRY_INTERVAL"
+            done
+
+            echo "healthcheck failed. last 50 log lines:"
+            run_docker logs --tail 50 "$PROJECT_NAME" || true
+            run_docker stop "$PROJECT_NAME" || true
+            exit 1
