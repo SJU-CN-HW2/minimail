@@ -1,0 +1,24 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.idea/
+.vscode/
+*.swp
+
+# Claude Code (local settings only)
+.claude/settings.local.json
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Runtime output (*.pcap / *.pcapng are intentionally tracked as evidence)
+*.log
+
+# Submission archive
+*.zip
