@@ -1,13 +1,31 @@
 {
   "metadata": {
-    "lastUpdated": "2026-11-23T05:47:36Z",
-    "currentVersion": "0.0.2",
+    "lastUpdated": "2026-11-23T16:43:32Z",
+    "currentVersion": "0.0.3",
     "projectTypes": [
       "basic"
     ],
-    "totalReleases": 1
+    "totalReleases": 2
   },
   "releases": [
+    {
+      "version": "0.0.3",
+      "project_types": [
+        "basic"
+      ],
+      "date": "2026-11-23",
+      "pr_number": null,
+      "raw_summary": "### 🔧 변경사항\n- add github issue and pr templates",
+      "parsed_changes": {
+        "changes": {
+          "title": "🔧 변경사항",
+          "items": [
+            "add github issue and pr templates"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.2",
       "project_types": [
