@@ -26,8 +26,8 @@
 
 ## Error flow
 
-- 서버 내부 오류는 `ErrorCode` enum 하나와 `MailServerException` 하나로 표현한다.
-- 각 프로토콜 세션 루프가 `ErrorCode`를 자기 응답 형식으로 번역한다(SMTP 응답 코드, POP3 `-ERR`, IMAP `NO`/`BAD`).
+- 서버 내부 오류는 `ServerErrorCode` enum(오류 메시지 템플릿 `errorMessage` 포함) 하나와 `MailServerException` 하나로 표현한다. 클라이언트는 `ClientErrorCode`와 `MailClientException`으로 표현하며, 둘은 서로 참조하지 않는다.
+- 각 프로토콜 세션 루프가 `ServerErrorCode`를 자기 응답 형식으로 번역한다(SMTP 응답 코드, POP3 `-ERR`, IMAP `NO`/`BAD`).
 - 예상하지 못한 예외는 프로토콜의 일반 오류 응답으로 바꾸고, 스택·SQL 등 내부 정보는 클라이언트에 보내지 않는다.
 
 ## Configuration

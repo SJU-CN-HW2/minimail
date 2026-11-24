@@ -23,7 +23,7 @@
 
 ## Error handling
 
-- 오류는 `ErrorCode` + `MailServerException`으로 던지고, 각 프로토콜 세션 루프에서 한 번 번역한다.
+- 오류는 `ServerErrorCode` + `MailServerException`(클라이언트는 `ClientErrorCode` + `MailClientException`)으로 던지고, 각 프로토콜 세션 루프에서 한 번 번역한다. 오류 문구는 enum의 `errorMessage`에 모으고 호출 지점에 인라인으로 쓰지 않는다.
 - 예외를 삼키지 않는다. 처리하지 못하면 다시 던지거나 로그를 남긴다.
 - 클라이언트에 내부 정보(스택, SQL, 경로)를 노출하지 않는다.
 - 외부 입력(프로토콜 명령 줄, 메일 본문)은 경계에서 검증한다.
