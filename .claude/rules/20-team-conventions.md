@@ -11,7 +11,9 @@
 - Google Java Style: 들여쓰기 2칸, 줄 길이 100자.
 - `.editorconfig`, 자동 포맷 도구, CI 포맷 검사는 두지 않는다. IDE 설정 파일은 사용자가 팀원에게 따로 전달한다.
 - 불변 객체(`record`, `final`)를 권장한다.
-- Lombok을 쓰지 않는다.
+- Lombok은 보일러플레이트를 줄이는 용도로만 쓴다. 허용: `@Getter`, `@Slf4j`, `@RequiredArgsConstructor`, `@NoArgsConstructor`(유틸리티 클래스는 `access = AccessLevel.PRIVATE`), `@AllArgsConstructor`, `@Builder`. 값 객체는 Lombok 대신 `record`를 쓴다.
+- Lombok의 `@Data`, `@Value`, `@Setter`, `@SneakyThrows`, `val`은 쓰지 않는다. 변경 가능성과 예외 흐름을 숨기기 때문이다. 필요하면 사용자와 합의한다.
+- 로거는 `@Slf4j`가 만드는 `log` 필드로 쓰고 직접 선언하지 않는다. IDE에서 annotation processing을 켠다(IDE 설정은 사용자가 팀원에게 전달한다).
 - 사용하지 않는 코드를 두지 않는다.
 - 서버 코드에서 `System.out`과 `printStackTrace`를 쓰지 않는다. 클라이언트가 사용자에게 보여 주는 출력은 예외다.
 
@@ -23,7 +25,7 @@
 
 ## Error handling
 
-- 오류는 `ErrorCode` + `MailServerException`으로 던지고, 각 프로토콜 세션 루프에서 한 번 번역한다.
+- 오류는 `ServerErrorCode` + `MailServerException`(클라이언트는 `ClientErrorCode` + `MailClientException`)으로 던지고, 각 프로토콜 세션 루프에서 한 번 번역한다. 오류 문구는 enum의 `errorMessage`에 모으고 호출 지점에 인라인으로 쓰지 않는다.
 - 예외를 삼키지 않는다. 처리하지 못하면 다시 던지거나 로그를 남긴다.
 - 클라이언트에 내부 정보(스택, SQL, 경로)를 노출하지 않는다.
 - 외부 입력(프로토콜 명령 줄, 메일 본문)은 경계에서 검증한다.

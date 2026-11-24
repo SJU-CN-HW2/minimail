@@ -17,9 +17,9 @@
 
 ## Allowed libraries
 
-- PG JDBC, HikariCP, Flyway, JUnit 5, Mockito, SLF4J + Logback
+- PG JDBC, HikariCP, Flyway, JUnit 5, Mockito, SLF4J + Logback, Lombok(허용 범위는 `20-team-conventions.md`)
 - 그 외 의존성은 필요해지는 시점에 사용자와 합의한 뒤 추가한다.
-- 쓰지 않는 것: ORM(Hibernate/JPA), Lombok, DI·서버 프레임워크, Netty 등, 완제품 메일 서버
+- 쓰지 않는 것: ORM(Hibernate/JPA), DI·서버 프레임워크, Netty 등, 완제품 메일 서버
 - 소켓·프로토콜 처리는 표준 `Socket`, `ServerSocket` 등으로 직접 구현한다.
 
 ## Roles
