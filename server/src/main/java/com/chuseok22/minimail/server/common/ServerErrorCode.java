@@ -30,6 +30,28 @@ public enum ServerErrorCode {
   /** 마이그레이션 적용에 실패한 경우. */
   DATABASE_MIGRATION_FAILED("데이터베이스 마이그레이션에 실패했습니다"),
 
+  LISTENER_OPEN_FAILED("프로토콜 리스너 포트를 열지 못했습니다"),
+
+  COMMAND_LINE_TOO_LONG("명령 줄이 최대 길이(%d바이트)를 넘었습니다"),
+
+  LISTENER_CLOSE_FAILED("프로토콜 리스너를 닫지 못했습니다"),
+
+  CONNECTION_ACCEPT_FAILED("연결을 수락하지 못했습니다"),
+
+  CONNECTION_LIMIT_EXCEEDED("동시 연결 수 제한을 넘어 연결을 거절했습니다"),
+
+  CONNECTION_SETUP_FAILED("연결을 준비하지 못했습니다"),
+
+  CONNECTION_READ_TIMEOUT("클라이언트가 제한 시간 동안 아무것도 보내지 않았습니다"),
+
+  CONNECTION_IO_FAILED("연결에서 입출력 오류가 발생했습니다"),
+
+  CONNECTION_CLOSED_EARLY("연결이 끊겨 %d바이트 중 %d바이트만 받았습니다"),
+
+  SOCKET_CLOSE_FAILED("소켓을 닫지 못했습니다"),
+
+  DISCONNECT_HANDLING_FAILED("연결 종료 처리 중 오류가 발생했습니다"),
+
   /** 그 외 서버 내부 오류. */
   INTERNAL_ERROR("예상하지 못한 서버 오류가 발생했습니다");
 
