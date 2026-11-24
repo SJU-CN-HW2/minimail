@@ -1,6 +1,7 @@
 package com.chuseok22.minimail.server.config;
 
 import com.chuseok22.minimail.server.common.MailServerException;
+import com.chuseok22.minimail.server.common.ServerConstants;
 import com.chuseok22.minimail.server.common.ServerErrorCode;
 import java.util.Map;
 
@@ -30,7 +31,6 @@ public record ServerConfig(
 
   private static final int MINIMUM_PORT = 1;
   private static final int MAXIMUM_PORT = 65535;
-  private static final String MASKED_PASSWORD = "****";
 
   /** 실제 환경변수에서 설정을 읽는다. 서버 모듈에서 {@code System.getenv}를 호출하는 유일한 곳이다. */
   public static ServerConfig fromEnvironment() {
@@ -88,7 +88,7 @@ public record ServerConfig(
         + ", databasePort=" + databasePort
         + ", databaseName=" + databaseName
         + ", databaseUser=" + databaseUser
-        + ", databasePassword=" + MASKED_PASSWORD
+        + ", databasePassword=" + ServerConstants.MASKED_PASSWORD
         + ", smtpPort=" + smtpPort
         + ", pop3Port=" + pop3Port
         + ", imapPort=" + imapPort + "]";
