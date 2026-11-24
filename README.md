@@ -1,7 +1,7 @@
 # minimail
 
 <!-- AUTO-VERSION-SECTION: DO NOT EDIT MANUALLY -->
-## 최신 버전 : v0.1.0 (2026-11-24)
+## 최신 버전 : v0.1.1 (2026-11-24)
 
 ## 프로젝트 개요
 
