@@ -21,4 +21,7 @@ public final class ServerConstants {
 
   /** Flyway 마이그레이션 SQL 위치. */
   public static final String MIGRATION_LOCATION = "classpath:db/migration";
+
+  /** 비밀번호 등 민감 값을 문자열로 출력할 때 대신 쓰는 마스킹 문자열. */
+  public static final String MASKED_PASSWORD = "****";
 }

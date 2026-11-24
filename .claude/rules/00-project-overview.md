@@ -25,6 +25,7 @@
 ## Roles
 
 - 사람이 작성: `server/`, `client/`의 Java 소스(네트워크 과제 범위). 이해하고 설명하는 것이 목적이다.
+- 저장소 계층(`member`, `mailbox`, `mail` 패키지의 저장소·엔티티와 JDBC)은 사용자가 요청하면 Claude가 작성할 수 있다. 담당자는 검토하고 설명한다.
 - Claude가 작성: CI/CD, 문서, 빌드·배포 설정(Gradle, Makefile, Dockerfile), Flyway SQL.
 - 리뷰와 설명은 Claude가 한다.
 - Java 소스는 사용자가 명시적으로 요청한 경우에만 작성한다. 어느 쪽인지 애매하면 작성하기 전에 묻는다.

@@ -1,13 +1,42 @@
 {
   "metadata": {
-    "lastUpdated": "2026-11-24T07:14:29Z",
-    "currentVersion": "0.1.1",
+    "lastUpdated": "2026-11-24T14:40:33Z",
+    "currentVersion": "0.2.0",
     "projectTypes": [
       "basic"
     ],
-    "totalReleases": 5
+    "totalReleases": 6
   },
   "releases": [
+    {
+      "version": "0.2.0",
+      "project_types": [
+        "basic"
+      ],
+      "date": "2026-11-24",
+      "pr_number": null,
+      "raw_summary": "### ✨ 기능\n- PostgreSQL_저장_계층_스키마_저장소_트랜잭션_추가 — 시드 테스트 계정을 koeun·jihoon·sungjo로 변경\n- PostgreSQL_저장_계층_스키마_저장소_트랜잭션_추가 — mail 저장소 추가\n- PostgreSQL_저장_계층_스키마_저장소_트랜잭션_추가 — member·mailbox 저장소 추가\n- PostgreSQL_저장_계층_스키마_저장소_트랜잭션_추가 — 스키마와 데모 시드 마이그레이션 추가\n- PostgreSQL_저장_계층_스키마_저장소_트랜잭션_추가 — 트랜잭션 관리자와 DB 오류 코드 추가\n\n### 📝 문서\n- readme에서 시연용 계정 절 제거\n- 저장 계층 작성 규칙과 시연용 계정 반영",
+      "parsed_changes": {
+        "feat": {
+          "title": "✨ 기능",
+          "items": [
+            "PostgreSQL_저장_계층_스키마_저장소_트랜잭션_추가 — 시드 테스트 계정을 koeun·jihoon·sungjo로 변경",
+            "PostgreSQL_저장_계층_스키마_저장소_트랜잭션_추가 — mail 저장소 추가",
+            "PostgreSQL_저장_계층_스키마_저장소_트랜잭션_추가 — member·mailbox 저장소 추가",
+            "PostgreSQL_저장_계층_스키마_저장소_트랜잭션_추가 — 스키마와 데모 시드 마이그레이션 추가",
+            "PostgreSQL_저장_계층_스키마_저장소_트랜잭션_추가 — 트랜잭션 관리자와 DB 오류 코드 추가"
+          ]
+        },
+        "docs": {
+          "title": "📝 문서",
+          "items": [
+            "readme에서 시연용 계정 절 제거",
+            "저장 계층 작성 규칙과 시연용 계정 반영"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.1.1",
       "project_types": [

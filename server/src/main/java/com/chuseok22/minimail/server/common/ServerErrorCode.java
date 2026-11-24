@@ -51,6 +51,15 @@ public enum ServerErrorCode {
   SOCKET_CLOSE_FAILED("소켓을 닫지 못했습니다"),
 
   DISCONNECT_HANDLING_FAILED("연결 종료 처리 중 오류가 발생했습니다"),
+  
+  /** 데이터베이스 질의나 트랜잭션 처리에 실패한 경우. */
+  DATABASE_QUERY_FAILED("데이터베이스 작업에 실패했습니다"),
+
+  /** 요청한 메일함이 없는 경우. */
+  MAILBOX_NOT_FOUND("메일함을 찾을 수 없습니다"),
+
+  /** 요청한 메일이 없는 경우. */
+  MAIL_NOT_FOUND("메일을 찾을 수 없습니다"),
 
   /** 그 외 서버 내부 오류. */
   INTERNAL_ERROR("예상하지 못한 서버 오류가 발생했습니다");
