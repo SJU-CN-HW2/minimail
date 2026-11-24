@@ -2,13 +2,14 @@ package com.chuseok22.minimail.client;
 
 import com.chuseok22.minimail.client.common.MailClientException;
 import com.chuseok22.minimail.client.config.ClientConfig;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 /** 클라이언트 진입점. 설정을 읽어 접속 대상을 안내한다. */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ClientMain {
 
   private static final int FAILURE_EXIT_CODE = 1;
-
-  private ClientMain() {}
 
   public static void main(String[] arguments) {
     ClientConfig config;
