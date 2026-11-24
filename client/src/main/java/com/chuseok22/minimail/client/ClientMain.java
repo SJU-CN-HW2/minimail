@@ -1,5 +1,6 @@
 package com.chuseok22.minimail.client;
 
+import com.chuseok22.minimail.client.common.MailClientException;
 import com.chuseok22.minimail.client.config.ClientConfig;
 
 /** 클라이언트 진입점. 설정을 읽어 접속 대상을 안내한다. */
@@ -13,7 +14,7 @@ public final class ClientMain {
     ClientConfig config;
     try {
       config = ClientConfig.fromEnvironment();
-    } catch (IllegalArgumentException exception) {
+    } catch (MailClientException exception) {
       System.err.println("클라이언트 설정이 올바르지 않습니다: " + exception.getMessage());
       System.exit(FAILURE_EXIT_CODE);
       return;

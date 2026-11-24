@@ -1,5 +1,7 @@
 package com.chuseok22.minimail.client.config;
 
+import com.chuseok22.minimail.client.common.ClientErrorCode;
+import com.chuseok22.minimail.client.common.MailClientException;
 import java.util.Map;
 
 /**
@@ -34,7 +36,7 @@ public record ClientConfig(String mailServerHost, int smtpPort, int pop3Port, in
   private static String readTrimmedText(Map<String, String> environment, String key) {
     String value = environment.get(key);
     if (value == null || value.isBlank()) {
-      throw new IllegalArgumentException(key + " 값이 비어 있습니다");
+      throw new MailClientException(ClientErrorCode.CONFIGURATION_VALUE_MISSING, key);
     }
     return value.trim();
   }
@@ -45,10 +47,11 @@ public record ClientConfig(String mailServerHost, int smtpPort, int pop3Port, in
     try {
       port = Integer.parseInt(text);
     } catch (NumberFormatException exception) {
-      throw new IllegalArgumentException(key + " 값이 정수가 아닙니다");
+      throw new MailClientException(ClientErrorCode.CONFIGURATION_VALUE_NOT_INTEGER, key);
     }
     if (port < MINIMUM_PORT || port > MAXIMUM_PORT) {
-      throw new IllegalArgumentException(key + " 값이 포트 범위(1~65535)를 벗어났습니다");
+      throw new MailClientException(
+          ClientErrorCode.CONFIGURATION_PORT_OUT_OF_RANGE, key, MINIMUM_PORT, MAXIMUM_PORT);
     }
     return port;
   }
