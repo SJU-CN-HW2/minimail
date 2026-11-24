@@ -1,7 +1,7 @@
 package com.chuseok22.minimail.server;
 
-import com.chuseok22.minimail.server.common.ErrorCode;
 import com.chuseok22.minimail.server.common.MailServerException;
+import com.chuseok22.minimail.server.common.ServerErrorCode;
 import com.chuseok22.minimail.server.config.ServerConfig;
 import com.chuseok22.minimail.server.database.DataSourceFactory;
 import com.chuseok22.minimail.server.database.DatabaseMigrator;
@@ -24,8 +24,7 @@ public final class ServerMain {
     } catch (MailServerException exception) {
       exitWithFailure(exception);
     } catch (RuntimeException exception) {
-      exitWithFailure(new MailServerException(
-          ErrorCode.INTERNAL_ERROR, "예상하지 못한 오류로 서버 시작에 실패했습니다.", exception));
+      exitWithFailure(new MailServerException(ServerErrorCode.INTERNAL_ERROR, exception));
     }
   }
 

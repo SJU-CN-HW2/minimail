@@ -1,8 +1,8 @@
 package com.chuseok22.minimail.server.database;
 
-import com.chuseok22.minimail.server.common.ErrorCode;
 import com.chuseok22.minimail.server.common.MailServerException;
 import com.chuseok22.minimail.server.common.ServerConstants;
+import com.chuseok22.minimail.server.common.ServerErrorCode;
 import com.chuseok22.minimail.server.config.ServerConfig;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
@@ -14,7 +14,7 @@ public final class DataSourceFactory {
   }
 
   /**
-   * 커넥션 풀을 생성한다. 풀 생성 중 접속에 실패하면 {@code DATABASE_FAILURE}를 던진다.
+   * 커넥션 풀을 생성한다. 풀 생성 중 접속에 실패하면 {@code DATABASE_CONNECTION_FAILED}를 던진다.
    * 오류 메시지에는 설정 값(비밀번호 등)을 넣지 않는다.
    */
   public static HikariDataSource create(ServerConfig config) {
@@ -28,8 +28,7 @@ public final class DataSourceFactory {
     try {
       return new HikariDataSource(hikariConfig);
     } catch (RuntimeException exception) {
-      throw new MailServerException(
-          ErrorCode.DATABASE_FAILURE, "데이터베이스 커넥션 풀을 만들지 못했습니다.", exception);
+      throw new MailServerException(ServerErrorCode.DATABASE_CONNECTION_FAILED, exception);
     }
   }
 }

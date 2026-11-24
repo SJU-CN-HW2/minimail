@@ -1,7 +1,7 @@
 package com.chuseok22.minimail.server.config;
 
-import com.chuseok22.minimail.server.common.ErrorCode;
 import com.chuseok22.minimail.server.common.MailServerException;
+import com.chuseok22.minimail.server.common.ServerErrorCode;
 import java.util.Map;
 
 /**
@@ -62,7 +62,7 @@ public record ServerConfig(
   private static String readPresentValue(Map<String, String> environment, String key) {
     String value = environment.get(key);
     if (value == null || value.isBlank()) {
-      throw invalid(key + " 값이 비어 있습니다");
+      throw new MailServerException(ServerErrorCode.CONFIGURATION_VALUE_MISSING, key);
     }
     return value;
   }
@@ -73,16 +73,13 @@ public record ServerConfig(
     try {
       port = Integer.parseInt(text);
     } catch (NumberFormatException exception) {
-      throw invalid(key + " 값이 정수가 아닙니다");
+      throw new MailServerException(ServerErrorCode.CONFIGURATION_VALUE_NOT_INTEGER, key);
     }
     if (port < MINIMUM_PORT || port > MAXIMUM_PORT) {
-      throw invalid(key + " 값이 포트 범위(1~65535)를 벗어났습니다");
+      throw new MailServerException(
+          ServerErrorCode.CONFIGURATION_PORT_OUT_OF_RANGE, key, MINIMUM_PORT, MAXIMUM_PORT);
     }
     return port;
-  }
-
-  private static MailServerException invalid(String message) {
-    return new MailServerException(ErrorCode.CONFIGURATION_INVALID, message);
   }
 
   @Override

@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.chuseok22.minimail.server.common.ErrorCode;
+import com.chuseok22.minimail.server.common.ServerErrorCode;
 import com.chuseok22.minimail.server.common.MailServerException;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,7 +56,7 @@ class ServerConfigTest {
     MailServerException exception =
         assertThrows(MailServerException.class, () -> ServerConfig.from(environment));
 
-    assertEquals(ErrorCode.CONFIGURATION_INVALID, exception.getErrorCode());
+    assertEquals(ServerErrorCode.CONFIGURATION_VALUE_MISSING, exception.getErrorCode());
     assertTrue(exception.getMessage().contains(key));
   }
 
@@ -68,26 +68,46 @@ class ServerConfigTest {
     MailServerException exception =
         assertThrows(MailServerException.class, () -> ServerConfig.from(environment));
 
-    assertEquals(ErrorCode.CONFIGURATION_INVALID, exception.getErrorCode());
+    assertEquals(ServerErrorCode.CONFIGURATION_VALUE_MISSING, exception.getErrorCode());
     assertTrue(exception.getMessage().contains("DB_PASSWORD"));
   }
 
   @ParameterizedTest
   @CsvSource({
-    "DB_PORT,0", "DB_PORT,65536", "DB_PORT,-1", "DB_PORT,abc",
-    "SMTP_PORT,0", "SMTP_PORT,65536", "SMTP_PORT,-1", "SMTP_PORT,abc",
-    "POP3_PORT,0", "POP3_PORT,65536", "POP3_PORT,-1", "POP3_PORT,abc",
-    "IMAP_PORT,0", "IMAP_PORT,65536", "IMAP_PORT,-1", "IMAP_PORT,abc"
+    "DB_PORT,0,CONFIGURATION_PORT_OUT_OF_RANGE",
+    "DB_PORT,65536,CONFIGURATION_PORT_OUT_OF_RANGE",
+    "DB_PORT,-1,CONFIGURATION_PORT_OUT_OF_RANGE",
+    "DB_PORT,abc,CONFIGURATION_VALUE_NOT_INTEGER",
+    "SMTP_PORT,0,CONFIGURATION_PORT_OUT_OF_RANGE",
+    "SMTP_PORT,65536,CONFIGURATION_PORT_OUT_OF_RANGE",
+    "SMTP_PORT,-1,CONFIGURATION_PORT_OUT_OF_RANGE",
+    "SMTP_PORT,abc,CONFIGURATION_VALUE_NOT_INTEGER",
+    "POP3_PORT,0,CONFIGURATION_PORT_OUT_OF_RANGE",
+    "POP3_PORT,65536,CONFIGURATION_PORT_OUT_OF_RANGE",
+    "POP3_PORT,-1,CONFIGURATION_PORT_OUT_OF_RANGE",
+    "POP3_PORT,abc,CONFIGURATION_VALUE_NOT_INTEGER",
+    "IMAP_PORT,0,CONFIGURATION_PORT_OUT_OF_RANGE",
+    "IMAP_PORT,65536,CONFIGURATION_PORT_OUT_OF_RANGE",
+    "IMAP_PORT,-1,CONFIGURATION_PORT_OUT_OF_RANGE",
+    "IMAP_PORT,abc,CONFIGURATION_VALUE_NOT_INTEGER"
   })
-  void invalidPortFails(String key, String invalidPort) {
+  void invalidPortFails(String key, String invalidPort, ServerErrorCode expectedErrorCode) {
     Map<String, String> environment = validEnvironment();
     environment.put(key, invalidPort);
 
     MailServerException exception =
         assertThrows(MailServerException.class, () -> ServerConfig.from(environment));
 
-    assertEquals(ErrorCode.CONFIGURATION_INVALID, exception.getErrorCode());
-    assertTrue(exception.getMessage().contains(key));
+    assertEquals(expectedErrorCode, exception.getErrorCode());
+    assertEquals(expectedMessage(expectedErrorCode, key), exception.getMessage());
+  }
+
+  private static String expectedMessage(ServerErrorCode errorCode, String key) {
+    return switch (errorCode) {
+      case CONFIGURATION_PORT_OUT_OF_RANGE -> key + " 값이 포트 범위(1~65535)를 벗어났습니다";
+      case CONFIGURATION_VALUE_NOT_INTEGER -> key + " 값이 정수가 아닙니다";
+      default -> throw new IllegalArgumentException(errorCode.name());
+    };
   }
 
   @Test
