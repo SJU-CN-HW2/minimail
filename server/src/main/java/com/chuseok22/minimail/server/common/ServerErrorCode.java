@@ -1,5 +1,8 @@
 package com.chuseok22.minimail.server.common;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 /**
  * 서버 내부 오류의 종류와 오류 메시지 템플릿.
  *
@@ -8,6 +11,8 @@ package com.chuseok22.minimail.server.common;
  *
  * <p>프로토콜별 오류는 명세 확정 후 담당자가 추가하며, 각 프로토콜 세션 루프가 자기 응답 형식으로 번역한다.
  */
+@Getter
+@RequiredArgsConstructor
 public enum ServerErrorCode {
 
   /** 필수 설정 값이 없거나 비어 있는 경우. 인자: 설정 키 이름. */
@@ -29,12 +34,4 @@ public enum ServerErrorCode {
   INTERNAL_ERROR("예상하지 못한 서버 오류가 발생했습니다");
 
   private final String errorMessage;
-
-  ServerErrorCode(String errorMessage) {
-    this.errorMessage = errorMessage;
-  }
-
-  public String getErrorMessage() {
-    return errorMessage;
-  }
 }

@@ -6,12 +6,12 @@ import com.chuseok22.minimail.server.common.ServerErrorCode;
 import com.chuseok22.minimail.server.config.ServerConfig;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 /** 설정으로부터 HikariCP 데이터 소스를 만든다. */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DataSourceFactory {
-
-  private DataSourceFactory() {
-  }
 
   /**
    * 커넥션 풀을 생성한다. 풀 생성 중 접속에 실패하면 {@code DATABASE_CONNECTION_FAILED}를 던진다.

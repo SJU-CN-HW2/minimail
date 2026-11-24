@@ -1,6 +1,10 @@
 package com.chuseok22.minimail.server.common;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
 /** 환경과 무관한 서버 고정값을 모아 둔 상수 클래스. */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ServerConstants {
 
   /** 데이터베이스 커넥션 풀 최대 크기. 임시값이며 기능 명세에서 확정한다. */
@@ -11,7 +15,4 @@ public final class ServerConstants {
 
   /** Flyway 마이그레이션 SQL 위치. */
   public static final String MIGRATION_LOCATION = "classpath:db/migration";
-
-  private ServerConstants() {
-  }
 }
