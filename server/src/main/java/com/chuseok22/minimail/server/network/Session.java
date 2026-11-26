@@ -43,7 +43,7 @@ public class Session {
         return decodeWithoutCarriageReturn(buffer.toByteArray());
       }
       buffer.write(readByte);
-      if (buffer.size() > ServerConstants.MAXIMUM_LINE_BYTES + 1) {
+      if (buffer.size() > ServerConstants.MAXIMUM_LINE_BYTES + 2) {
         throw new MailServerException(
             ServerErrorCode.COMMAND_LINE_TOO_LONG, ServerConstants.MAXIMUM_LINE_BYTES);
       }

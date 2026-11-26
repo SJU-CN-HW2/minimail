@@ -85,9 +85,10 @@ public class TcpServer {
     MDC.put("sessionId", UUID.randomUUID().toString().substring(0, SESSION_ID_LENGTH));
     MDC.put("protocol", protocolName);
     MDC.put("remote", String.valueOf(socket.getRemoteSocketAddress()));
-    ProtocolHandler handler = handlerFactory.get();
+    ProtocolHandler handler = null;
     Session session = null;
     try {
+      handler = handlerFactory.get();
       session = new Session(socket);
       log.info("연결 수립");
       handler.onConnect(session);
