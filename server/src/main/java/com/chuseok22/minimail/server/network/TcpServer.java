@@ -1,5 +1,6 @@
 package com.chuseok22.minimail.server.network;
 
+import com.chuseok22.minimail.server.common.GlobalExceptionHandler;
 import com.chuseok22.minimail.server.common.MailServerException;
 import com.chuseok22.minimail.server.common.ServerConstants;
 import com.chuseok22.minimail.server.common.ServerErrorCode;
@@ -19,14 +20,17 @@ public class TcpServer {
 
   private final String protocolName;
   private final int port;
+  private final int readTimeoutMilliseconds;
   private final Supplier<ProtocolHandler> handlerFactory;
   private final Semaphore connectionPermits =
       new Semaphore(ServerConstants.MAXIMUM_CONCURRENT_CONNECTIONS);
   private ServerSocket serverSocket;
 
-  public TcpServer(String protocolName, int port, Supplier<ProtocolHandler> handlerFactory) {
+  public TcpServer(String protocolName, int port, int readTimeoutMilliseconds,
+      Supplier<ProtocolHandler> handlerFactory) {
     this.protocolName = protocolName;
     this.port = port;
+    this.readTimeoutMilliseconds = readTimeoutMilliseconds;
     this.handlerFactory = handlerFactory;
   }
 
@@ -34,11 +38,10 @@ public class TcpServer {
     try {
       serverSocket = new ServerSocket(port);
     } catch (IOException exception) {
-      log.error("{} protocol={} port={}",
-          ServerErrorCode.LISTENER_OPEN_FAILED.getErrorMessage(), protocolName, port);
-      throw new MailServerException(ServerErrorCode.LISTENER_OPEN_FAILED, exception);
+      throw new MailServerException(ServerErrorCode.TCP_CONNECTION_FAILED, exception);
     }
-    log.info("리스너 시작. protocol={} port={}", protocolName, port);
+    log.info("리스너 시작. protocol={} port={} readTimeout={}ms",
+        protocolName, port, readTimeoutMilliseconds);
     Thread.ofPlatform().name(protocolName + "-acceptor").start(this::acceptLoop);
   }
 
@@ -46,8 +49,8 @@ public class TcpServer {
     try {
       serverSocket.close();
     } catch (IOException exception) {
-      log.warn("{} protocol={}",
-          ServerErrorCode.LISTENER_CLOSE_FAILED.getErrorMessage(), protocolName, exception);
+      GlobalExceptionHandler.handle(
+          new MailServerException(ServerErrorCode.TCP_CONNECTION_FAILED, exception));
     }
   }
 
@@ -58,16 +61,16 @@ public class TcpServer {
         socket = serverSocket.accept();
       } catch (IOException exception) {
         if (!serverSocket.isClosed()) {
-          log.error("{} protocol={}",
-              ServerErrorCode.CONNECTION_ACCEPT_FAILED.getErrorMessage(), protocolName, exception);
+          GlobalExceptionHandler.handle(
+              new MailServerException(ServerErrorCode.TCP_CONNECTION_FAILED, exception));
         }
         continue;
       }
       if (!connectionPermits.tryAcquire()) {
-        log.warn("{} protocol={} remote={} limit={}",
+        log.info("{} protocol={} remote={} limit={}",
             ServerErrorCode.CONNECTION_LIMIT_EXCEEDED.getErrorMessage(), protocolName,
             socket.getRemoteSocketAddress(), ServerConstants.MAXIMUM_CONCURRENT_CONNECTIONS);
-        closeQuietly(socket);
+        closeSocket(socket);
         continue;
       }
       Thread.ofVirtual().start(() -> {
@@ -80,16 +83,16 @@ public class TcpServer {
     }
     log.info("리스너 종료. protocol={} port={}", protocolName, port);
   }
-  
+
   private void serve(Socket socket) {
-    MDC.put("sessionId", UUID.randomUUID().toString().substring(0, SESSION_ID_LENGTH));
-    MDC.put("protocol", protocolName);
-    MDC.put("remote", String.valueOf(socket.getRemoteSocketAddress()));
     ProtocolHandler handler = null;
     Session session = null;
     try {
+      MDC.put("sessionId", UUID.randomUUID().toString().substring(0, SESSION_ID_LENGTH));
+      MDC.put("protocol", protocolName);
+      MDC.put("remote", String.valueOf(socket.getRemoteSocketAddress()));
       handler = handlerFactory.get();
-      session = new Session(socket);
+      session = new Session(socket, readTimeoutMilliseconds);
       log.info("연결 수립");
       handler.onConnect(session);
       while (!session.isClosed()) {
@@ -97,11 +100,11 @@ public class TcpServer {
         if (line == null) {
           break;
         }
-        log.debug("C: {}", line);
+        log.info("C: {}", line);
         handler.onLine(session, line);
       }
     } catch (RuntimeException exception) {
-      logSessionError(toMailServerException(exception), session);
+      GlobalExceptionHandler.handle(exception);
     } finally {
       finish(handler, session, socket);
       MDC.clear();
@@ -110,43 +113,26 @@ public class TcpServer {
 
   private void finish(ProtocolHandler handler, Session session, Socket socket) {
     if (session == null) {
-      closeQuietly(socket);
+      closeSocket(socket);
       log.info("연결 종료");
       return;
     }
     try {
       handler.onDisconnect(session);
     } catch (RuntimeException exception) {
-      log.error(ServerErrorCode.DISCONNECT_HANDLING_FAILED.getErrorMessage(), exception);
+      GlobalExceptionHandler.handle(
+          new MailServerException(ServerErrorCode.TCP_CONNECTION_FAILED, exception));
     }
     session.close();
     log.info("연결 종료");
   }
 
-  private static void logSessionError(MailServerException exception, Session session) {
-    ServerErrorCode errorCode = exception.getErrorCode();
-    if (errorCode == ServerErrorCode.INTERNAL_ERROR) {
-      log.error("연결을 끊습니다. errorCode={}", errorCode, exception);
-      return;
-    }
-    if (session != null && session.isClosed()) {
-      return;
-    }
-    log.warn("연결을 끊습니다. errorCode={} reason={}", errorCode, exception.getMessage());
-  }
-
-  private static MailServerException toMailServerException(RuntimeException exception) {
-    if (exception instanceof MailServerException mailServerException) {
-      return mailServerException;
-    }
-    return new MailServerException(ServerErrorCode.INTERNAL_ERROR, exception);
-  }
-
-  private static void closeQuietly(Socket socket) {
+  private static void closeSocket(Socket socket) {
     try {
       socket.close();
     } catch (IOException exception) {
-      log.warn(ServerErrorCode.SOCKET_CLOSE_FAILED.getErrorMessage(), exception);
+      GlobalExceptionHandler.handle(
+          new MailServerException(ServerErrorCode.TCP_CONNECTION_FAILED, exception));
     }
   }
 }

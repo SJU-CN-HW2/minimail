@@ -1,5 +1,6 @@
 package com.chuseok22.minimail.server.network;
 
+import com.chuseok22.minimail.server.common.GlobalExceptionHandler;
 import com.chuseok22.minimail.server.common.MailServerException;
 import com.chuseok22.minimail.server.common.ServerConstants;
 import com.chuseok22.minimail.server.common.ServerErrorCode;
@@ -9,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,14 +24,14 @@ public class Session {
   private final OutputStream outputStream;
   private volatile boolean closed;
 
-  public Session(Socket socket) {
+  public Session(Socket socket, int readTimeoutMilliseconds) {
     this.socket = socket;
     try {
-      socket.setSoTimeout(ServerConstants.SOCKET_READ_TIMEOUT_MILLISECONDS);
+      socket.setSoTimeout(readTimeoutMilliseconds);
       this.inputStream = new BufferedInputStream(socket.getInputStream());
       this.outputStream = socket.getOutputStream();
     } catch (IOException exception) {
-      throw new MailServerException(ServerErrorCode.CONNECTION_SETUP_FAILED, exception);
+      throw new MailServerException(ServerErrorCode.TCP_CONNECTION_FAILED, exception);
     }
   }
 
@@ -43,9 +43,8 @@ public class Session {
         return decodeWithoutCarriageReturn(buffer.toByteArray());
       }
       buffer.write(readByte);
-      if (buffer.size() > ServerConstants.MAXIMUM_LINE_BYTES + 2) {
-        throw new MailServerException(
-            ServerErrorCode.COMMAND_LINE_TOO_LONG, ServerConstants.MAXIMUM_LINE_BYTES);
+      if (buffer.size() > ServerConstants.MAXIMUM_LINE_BYTES + LINE_TERMINATOR.length()) {
+        throw new MailServerException(ServerErrorCode.TCP_CONNECTION_FAILED);
       }
     }
     return buffer.size() > 0 ? decodeWithoutCarriageReturn(buffer.toByteArray()) : null;
@@ -56,21 +55,21 @@ public class Session {
     try {
       data = inputStream.readNBytes(length);
     } catch (IOException exception) {
-      throw toMailServerException(exception);
+      throw GlobalExceptionHandler.toMailServerException(exception);
     }
     if (data.length < length) {
-      throw new MailServerException(ServerErrorCode.CONNECTION_CLOSED_EARLY, length, data.length);
+      throw new MailServerException(ServerErrorCode.TCP_CONNECTION_FAILED);
     }
     return data;
   }
 
   public void writeLine(String line) {
-    log.debug("S: {}", line);
+    log.info("S: {}", line);
     try {
       outputStream.write((line + LINE_TERMINATOR).getBytes(StandardCharsets.UTF_8));
       outputStream.flush();
     } catch (IOException exception) {
-      throw toMailServerException(exception);
+      throw GlobalExceptionHandler.toMailServerException(exception);
     }
   }
 
@@ -82,7 +81,8 @@ public class Session {
     try {
       socket.close();
     } catch (IOException exception) {
-      log.warn(ServerErrorCode.SOCKET_CLOSE_FAILED.getErrorMessage(), exception);
+      GlobalExceptionHandler.handle(
+          new MailServerException(ServerErrorCode.TCP_CONNECTION_FAILED, exception));
     }
   }
 
@@ -98,15 +98,8 @@ public class Session {
     try {
       return inputStream.read();
     } catch (IOException exception) {
-      throw toMailServerException(exception);
+      throw GlobalExceptionHandler.toMailServerException(exception);
     }
-  }
-
-  private static MailServerException toMailServerException(IOException exception) {
-    if (exception instanceof SocketTimeoutException) {
-      return new MailServerException(ServerErrorCode.CONNECTION_READ_TIMEOUT, exception);
-    }
-    return new MailServerException(ServerErrorCode.CONNECTION_IO_FAILED, exception);
   }
 
   private static String decodeWithoutCarriageReturn(byte[] bytes) {

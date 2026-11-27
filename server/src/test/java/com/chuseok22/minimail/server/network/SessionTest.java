@@ -33,7 +33,7 @@ class SessionTest {
     socket = mock(Socket.class);
     when(socket.getInputStream()).thenReturn(new ByteArrayInputStream(received));
     when(socket.getOutputStream()).thenReturn(sentBytes);
-    return new Session(socket);
+    return new Session(socket, ServerConstants.POP3_READ_TIMEOUT_MILLISECONDS);
   }
 
   @Test
@@ -88,7 +88,7 @@ class SessionTest {
     Session session = sessionReceiving("a".repeat(ServerConstants.MAXIMUM_LINE_BYTES + 2) + "\r\n");
 
     MailServerException exception = assertThrows(MailServerException.class, session::readLine);
-    assertEquals(ServerErrorCode.COMMAND_LINE_TOO_LONG, exception.getErrorCode());
+    assertEquals(ServerErrorCode.TCP_CONNECTION_FAILED, exception.getErrorCode());
   }
 
   @Test
@@ -106,7 +106,7 @@ class SessionTest {
 
     MailServerException exception =
         assertThrows(MailServerException.class, () -> session.readBytes(10));
-    assertEquals(ServerErrorCode.CONNECTION_CLOSED_EARLY, exception.getErrorCode());
+    assertEquals(ServerErrorCode.TCP_CONNECTION_FAILED, exception.getErrorCode());
   }
 
   @Test

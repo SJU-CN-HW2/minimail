@@ -15,7 +15,11 @@ public final class ServerConstants {
 
   public static final int MAXIMUM_CONCURRENT_CONNECTIONS = 100;
 
-  public static final int SOCKET_READ_TIMEOUT_MILLISECONDS = 600_000;
+  public static final int SMTP_READ_TIMEOUT_MILLISECONDS = 300_000;
+
+  public static final int POP3_READ_TIMEOUT_MILLISECONDS = 600_000;
+
+  public static final int IMAP_READ_TIMEOUT_MILLISECONDS = 1_800_000;
 
   public static final int MAXIMUM_LINE_BYTES = 65_536;
 
