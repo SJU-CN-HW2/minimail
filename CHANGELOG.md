@@ -1,7 +1,18 @@
 # Changelog
 
-**현재 버전:** 0.2.0  
-**마지막 업데이트:** 2026-11-24T14:40:33Z  
+**현재 버전:** 0.3.0  
+**마지막 업데이트:** 2026-11-28T05:32:13Z  
+
+---
+
+## [0.3.0] - 2026-11-28
+
+**✨ 기능**
+- ERROR처리 단순화
+- common_TCP_interface — 공통 TCP 인터페이스(ProtocolHandler, Session, TcpServer)와 ServerErrorCode 기반 연결 오류 처리 추가
+
+**🐛 수정**
+- common_TCP_interface — 핸들러 생성을 try 안으로 옮기고 줄 길이 기준을 +2로 변경
 
 ---
 
