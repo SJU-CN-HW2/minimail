@@ -1,7 +1,6 @@
 package com.chuseok22.minimail.server;
 
-import com.chuseok22.minimail.server.common.MailServerException;
-import com.chuseok22.minimail.server.common.ServerErrorCode;
+import com.chuseok22.minimail.server.common.GlobalExceptionHandler;
 import com.chuseok22.minimail.server.config.ServerConfig;
 import com.chuseok22.minimail.server.database.DataSourceFactory;
 import com.chuseok22.minimail.server.database.DatabaseMigrator;
@@ -20,16 +19,11 @@ public final class ServerMain {
   public static void main(String[] arguments) {
     try {
       start();
-    } catch (MailServerException exception) {
-      exitWithFailure(exception);
     } catch (RuntimeException exception) {
-      exitWithFailure(new MailServerException(ServerErrorCode.INTERNAL_ERROR, exception));
+      log.error("서버 시작에 실패했습니다.");
+      GlobalExceptionHandler.handle(exception);
+      System.exit(FAILURE_EXIT_CODE);
     }
-  }
-
-  private static void exitWithFailure(MailServerException exception) {
-    log.error("서버 시작에 실패했습니다. errorCode={}", exception.getErrorCode(), exception);
-    System.exit(FAILURE_EXIT_CODE);
   }
 
   private static void start() {

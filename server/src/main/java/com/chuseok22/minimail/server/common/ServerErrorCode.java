@@ -30,6 +30,12 @@ public enum ServerErrorCode {
   /** 마이그레이션 적용에 실패한 경우. */
   DATABASE_MIGRATION_FAILED("데이터베이스 마이그레이션에 실패했습니다"),
 
+  TCP_CONNECTION_FAILED("TCP 연결에 실패했습니다"),
+
+  TCP_CONNECTION_TIMEOUT("TCP 연결이 제한 시간을 넘었습니다"),
+
+  CONNECTION_LIMIT_EXCEEDED("동시 연결 수 제한을 넘어 연결을 거절했습니다"),
+
   /** 데이터베이스 질의나 트랜잭션 처리에 실패한 경우. */
   DATABASE_QUERY_FAILED("데이터베이스 작업에 실패했습니다"),
 

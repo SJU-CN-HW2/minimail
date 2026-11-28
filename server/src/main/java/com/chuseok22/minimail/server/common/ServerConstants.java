@@ -13,6 +13,16 @@ public final class ServerConstants {
   /** 데이터베이스 커넥션 획득 제한 시간(밀리초). 임시값이며 기능 명세에서 확정한다. */
   public static final long DATABASE_CONNECTION_TIMEOUT_MILLISECONDS = 5_000;
 
+  public static final int MAXIMUM_CONCURRENT_CONNECTIONS = 100;
+
+  public static final int SMTP_READ_TIMEOUT_MILLISECONDS = 300_000;
+
+  public static final int POP3_READ_TIMEOUT_MILLISECONDS = 600_000;
+
+  public static final int IMAP_READ_TIMEOUT_MILLISECONDS = 1_800_000;
+
+  public static final int MAXIMUM_LINE_BYTES = 65_536;
+
   /** Flyway 마이그레이션 SQL 위치. */
   public static final String MIGRATION_LOCATION = "classpath:db/migration";
 
